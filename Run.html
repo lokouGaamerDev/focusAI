@@ -1,3 +1,4 @@
+<!-- SAVE AS run.html -->
 <!DOCTYPE html>
 <html lang="en" class="dark">
 
@@ -35,7 +36,9 @@
       --glow: rgba(0, 255, 200, 0.35);
     }
 
-    html { transition: background .55s ease, color .55s ease; }
+    html {
+      transition: background .55s ease, color .55s ease;
+    }
 
     body {
       margin: 0;
@@ -65,28 +68,74 @@
       gap: 12px;
     }
 
-    .header-left { display: flex; flex-direction: column; }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hambtn {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
 
     .header-title {
       font-size: 34px;
       font-weight: 900;
       background: linear-gradient(92deg, #4cf0e2, #4e7bff, #c744ff);
+      background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       opacity: 0;
       transform: translateY(-12px);
-      animation: fadeTitle .6s cubic-bezier(.22,.9,.24,1) forwards .8s,
-                 neonMove 5s linear infinite;
+      animation: fadeTitle .6s cubic-bezier(.22, .9, .24, 1) forwards .8s,
+        neonMove 5s linear infinite;
     }
 
-    @keyframes fadeTitle { to { opacity:1; transform:translateY(0);} }
-    @keyframes neonMove { 0%{background-position:0%} 100%{background-position:200%} }
+    @keyframes fadeTitle {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-    .stat-number { font-size: 28px; font-weight: 800; }
+    @keyframes neonMove {
+      0% {
+        background-position: 0% center;
+      }
 
-    .header-right { display:flex; gap:18px; align-items:center; }
-    .stat-block { text-align:center; }
-    .small-label { font-size:12px; opacity:.85; text-transform:uppercase; }
+      100% {
+        background-position: 200% center;
+      }
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .stat-block {
+      text-align: center;
+    }
+
+    .small-label {
+      font-size: 12px;
+      opacity: 0.85;
+      text-transform: uppercase;
+    }
 
     main {
       flex: 1;
@@ -102,20 +151,23 @@
       height: 640px;
       max-height: 62vh;
       border-radius: 14px;
-      background: #000;
       box-shadow: 0 0 30px var(--glow);
+      background: #000;
     }
 
     .strict-card {
-      padding: 12px;
+      padding: 8px 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      margin-right: 8px;
     }
 
+    .strict-card .label { font-size: 11px; text-transform:uppercase; opacity:.8; letter-spacing:1px; }
+
     input[type=range] {
-      width: 180px;
+      width: 160px;
       height: 6px;
       background: linear-gradient(90deg, #00ff87, #ffdd00, #ff004c);
       border-radius: 999px;
@@ -129,7 +181,8 @@
       height: 18px;
       border-radius: 50%;
       background: #fff;
-      border: 3px solid var(--highlight);
+      border: 3px solid #4cf0ff;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
     }
 
     footer {
@@ -140,91 +193,176 @@
     }
 
     .action-btn {
-      width: 180px; padding:12px;
-      color:white; border:none;
-      border-radius:12px; font-weight:700;
+      width: 180px;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      border: none;
     }
 
-    .start-btn { background:linear-gradient(90deg,#2ee6ff,#4870ff); }
-    .stop-btn { background:linear-gradient(90deg,#ff3d5a,#d90429); }
+    .start-btn {
+      background: linear-gradient(90deg, #2ee6ff, #4870ff);
+    }
 
-    /* THEME TOGGLE bottom right */
+    .stop-btn {
+      background: linear-gradient(90deg, #ff3d5a, #d90429);
+    }
+
+    /* THEME TOGGLE — bottom-right */
     #themeToggle {
       position: fixed;
       right: 24px;
       bottom: 24px;
-      width: 52px; height: 52px;
-      display:flex; align-items:center; justify-content:center;
-      background: var(--glass);
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass);
       border: 2px solid var(--highlight);
       backdrop-filter: blur(12px);
-      cursor:pointer;
-      z-index:999;
-      transition: .25s;
+      cursor: pointer;
+      z-index: 999;
+      transition: transform .25s ease;
     }
-    #themeToggle:hover { transform: scale(1.1); }
-    #themeIcon { font-size:22px; }
+
+    #themeToggle:hover {
+      transform: scale(1.08);
+    }
+
+    #themeIcon {
+      font-size: 22px;
+    }
 
     .theme-fade {
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       pointer-events: none;
       opacity: 0;
       z-index: 998;
-      background: var(--bg);
       transition: opacity .5s ease;
+      background: var(--bg);
     }
 
     /* LOADER */
     #loader {
-      position:absolute; inset:0;
-      display:none; align-items:center; justify-content:center;
-      background:rgba(0,0,0,0.4); backdrop-filter:blur(6px);
-      z-index:300;
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(6px);
+      z-index: 200;
     }
+
     #loader .spinner {
-      width:60px; height:60px;
-      border-radius:50%;
-      border:6px solid rgba(255,255,255,0.12);
-      border-top-color:var(--highlight);
+      width: 65px;
+      height: 65px;
+      border-radius: 50%;
+      border: 6px solid rgba(255, 255, 255, 0.12);
+      border-top-color: var(--highlight);
       animation: spin .8s linear infinite;
     }
-    @keyframes spin { to{ transform:rotate(360deg);} }
 
-    /* Recording mini buttons */
-    .record-controls { display:flex; gap:8px; align-items:center; }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* small FPS badge */
+    #fpsBadge {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+      backdrop-filter: blur(6px);
+    }
+
+    /* RECORDING controls */
+    .record-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     .mini-btn {
       padding: 8px 10px;
-      background: rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
-      color:white;
-      cursor:pointer;
-      font-weight:700;
+      background: rgba(255, 255, 255, 0.06);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      font-weight: 700;
     }
-    .mini-btn:disabled { opacity:0.4; cursor:not-allowed; }
 
-    /* FIX: LIGHT THEME VISIBILITY */
+    .mini-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* FIX mini button colors for light theme */
     :root:not(.dark) .mini-btn {
-      background: rgba(0,0,0,0.08) !important;
-      color:#111 !important;
-      border:1px solid rgba(0,0,0,0.15) !important;
+      background: rgba(0, 0, 0, 0.08) !important;
+      color: #111 !important;
+      border: 1px solid rgba(0, 0, 0, 0.15) !important;
     }
+
     :root:not(.dark) .mini-btn:hover {
-      background: rgba(0,0,0,0.12) !important;
+      background: rgba(0, 0, 0, 0.12) !important;
     }
 
-    /* INTRO */
-    @keyframes introPulse {
-      0% { filter:drop-shadow(0 0 12px #4cf0ff); }
-      50% { filter:drop-shadow(0 0 30px #4cf0ff); }
-      100% { filter:drop-shadow(0 0 12px #4cf0ff); }
+    /* Drawer */
+    #leftDrawer {
+      position: fixed;
+      left: -340px;
+      top: 0;
+      bottom: 0;
+      width: 320px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      box-shadow: 8px 0 40px rgba(0,0,0,0.5);
+      z-index: 1200;
+      transition: left 300ms cubic-bezier(.2,.9,.2,1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      backdrop-filter: blur(12px);
     }
 
-    @media(max-width:900px){
-      header{flex-direction:column; text-align:center;}
-      #canvas{width:92vw; height:52vh;}
-      .action-btn{width:90%;}
+    #leftDrawer.open { left: 0; }
+
+    .drawer-item {
+      padding: 12px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .drawer-item:hover {
+      background: rgba(255,255,255,0.03);
+    }
+
+    .drawer-close {
+      margin-left: auto;
+      cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      header { flex-direction: column; gap: 12px; text-align: center; }
+      #canvas { width: 92vw; height: 52vh; }
+      .strict-card { width: 92%; }
+      .action-btn { width: 90%; }
+      #leftDrawer { width: 92vw; left: -100%; }
+      #leftDrawer.open { left: 0; }
     }
   </style>
 </head>
@@ -232,23 +370,59 @@
 <body>
 
   <!-- INTRO -->
-  <div id="introScreen" style="position:fixed; inset:0; background:black; display:flex; justify-content:center; align-items:center; z-index:2000; transition:.8s;">
-    <img id="introLogo" src="ailogo.png" style="width:160px; opacity:0; transform:scale(.5); transition:.8s; filter:drop-shadow(0 0 12px #4cf0ff);">
+  <div id="introScreen"
+    style="position:fixed; inset:0; background:black; display:flex; align-items:center; justify-content:center; z-index:2000; transition:opacity .8s ease;">
+    <img id="introLogo" src="ailogo.png"
+      style="width:160px; opacity:0; transform:scale(.5); transition:opacity .8s ease, transform 1.2s cubic-bezier(.16,.8,.24,1); filter:drop-shadow(0 0 12px #4cf0ff);">
   </div>
 
   <div id="themeFade" class="theme-fade"></div>
-  <button id="themeToggle" class="glass"><span id="themeIcon">🌙</span></button>
 
-  <header class="glass">
-
-    <div class="header-left">
-      <div class="header-title">FOCUS AI</div>
-      <div style="font-size:12px;opacity:.85;">Student Attention Detection System</div>
+  <!-- Drawer -->
+  <div id="leftDrawer" aria-hidden="true">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <strong style="font-size:18px;">Menu</strong>
+      <div class="drawer-close" id="closeDrawer" title="Close">✕</div>
     </div>
 
-    <div class="strict-card glass">
-      <div style="font-size:12px;opacity:.85;">Strictness</div>
-      <div id="strictText" style="font-size:12px;color:var(--highlight);">Medium</div>
+    <div class="drawer-item" id="menuStudents">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4 -4 1.79-4 4 1.79 4 4 4zM6 20c0-3.31 2.69-6 6-6s6 2.69 6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <div>Students Database</div>
+    </div>
+
+    <div class="drawer-item" id="menuTrainer">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 3h18v4H3zM7 12h10M9 16h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>FaceModel Trainer (future)</div>
+    </div>
+
+    <div style="flex:1;"></div>
+
+    <div style="font-size:12px; opacity:.8;">Version 1 — Student Database ready</div>
+  </div>
+
+  <!-- THEME TOGGLE -->
+  <button id="themeToggle" class="glass" aria-label="Toggle theme" title="Toggle theme">
+    <span id="themeIcon">🌙</span>
+  </button>
+
+  <!-- HEADER -->
+  <header class="glass" role="banner">
+    <div class="header-left">
+      <div class="hambtn" id="hamburger" title="Menu" aria-label="Open menu">
+        <!-- simple hamburger -->
+        <svg width="20" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <div>
+        <div class="header-title">FOCUS AI</div>
+        <div style="font-size:12px; opacity:.85;">Student Attention Detection System</div>
+      </div>
+    </div>
+
+    <!-- Strictness control added back so JS has the elements it expects -->
+    <div class="strict-card glass" style="margin-right:12px;">
+      <div class="label">Strictness</div>
+      <div id="strictText" style="font-size:12px; color:var(--highlight);">Medium</div>
       <input id="sensitivity" type="range" min="20" max="80" value="50">
     </div>
 
@@ -268,8 +442,7 @@
         <div id="fpsDisplay" class="stat-number" style="color:#ffd166;">--</div>
       </div>
 
-      <!-- Recording Controls -->
-      <div class="record-controls">
+      <div class="record-controls" style="margin-left:6px;">
         <button id="startRecBtn" class="mini-btn">REC</button>
         <button id="stopRecBtn" class="mini-btn" disabled>STOP</button>
         <button id="exportVideoBtn" class="mini-btn" disabled>EXPORT MP4</button>
@@ -277,45 +450,68 @@
         <button id="exportJSONBtn" class="mini-btn">JSON</button>
       </div>
     </div>
-
   </header>
 
+  <!-- MAIN -->
   <main>
     <div id="loader"><div class="spinner"></div></div>
     <video id="video" class="hidden" playsinline></video>
     <canvas id="canvas"></canvas>
   </main>
 
+  <!-- FOOTER -->
   <footer>
     <button id="initBtn" class="action-btn start-btn">START SYSTEM</button>
     <button id="stopBtn" class="action-btn stop-btn hidden">STOP SYSTEM</button>
   </footer>
-  <!-- ==================== PART 2: SCRIPTS (intro, UI, FPS, recording, backend) ==================== -->
+
+  <!-- SCRIPTS: UI + recording features + backend -->
   <script>
-    /* INTRO ANIMATION */
+    /* Drawer behavior */
+    const hamburger = document.getElementById('hamburger');
+    const leftDrawer = document.getElementById('leftDrawer');
+    const closeDrawer = document.getElementById('closeDrawer');
+    const menuStudents = document.getElementById('menuStudents');
+
+    if (hamburger) hamburger.addEventListener('click', () => {
+      leftDrawer.classList.add('open');
+      leftDrawer.setAttribute('aria-hidden', 'false');
+    });
+    if (closeDrawer) closeDrawer.addEventListener('click', () => {
+      leftDrawer.classList.remove('open');
+      leftDrawer.setAttribute('aria-hidden', 'true');
+    });
+    // clicking outside drawer closes it
+    document.addEventListener('click', (e) => {
+      if (leftDrawer && !leftDrawer.contains(e.target) && !hamburger.contains(e.target)) {
+        leftDrawer.classList.remove('open');
+        leftDrawer.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    // open students page (separate page)
+    if (menuStudents) menuStudents.addEventListener('click', () => {
+      leftDrawer.classList.remove('open');
+      window.location.href = 'students.html';
+    });
+
+    // INTRO ANIMATION
     window.addEventListener("load", () => {
       const intro = document.getElementById("introScreen");
       const logo = document.getElementById("introLogo");
-
       setTimeout(() => {
-        logo.style.opacity = "1";
-        logo.style.transform = "scale(1)";
-        logo.style.animation = "introPulse 2s infinite";
+        if (logo) { logo.style.opacity = "1"; logo.style.transform = "scale(1)"; logo.style.animation = "introPulse 2s infinite"; }
       }, 150);
-
       setTimeout(() => {
-        logo.style.opacity = "0";
-        logo.style.transform = "translateY(-40px) scale(.8)";
+        if (logo) { logo.style.opacity = "0"; logo.style.transform = "translateY(-40px) scale(.8)"; }
       }, 1850);
-
-      setTimeout(() => { intro.style.opacity = "0"; }, 2400);
-      setTimeout(() => { intro.style.display = "none"; }, 3100);
+      setTimeout(() => { if (intro) intro.style.opacity = "0"; }, 2400);
+      setTimeout(() => { if (intro) intro.style.display = "none"; }, 3100);
     });
 
-    /* AUDIO + UNLOCK */
+    /* AUDIO + SLIDER + THEME + RECORDING helpers */
     const clickSfx = new Audio("click.wav");
     clickSfx.preload = "auto"; clickSfx.volume = 0.45;
-
     const sliderSfx = new Audio("slider.wav");
     sliderSfx.preload = "auto"; sliderSfx.volume = 0.14;
 
@@ -331,57 +527,54 @@
     }
     document.addEventListener("pointerdown", unlockAudioAPIs, { once: true, passive: true });
 
-    function safePlayClick(){
-      try { clickSfx.currentTime = 0; clickSfx.play().catch(()=>{}); } catch(e){}
-    }
-    document.querySelectorAll("button").forEach(b=>b.addEventListener("click", safePlayClick));
+    function safePlayClick(){ try { clickSfx.currentTime = 0; clickSfx.play().catch(()=>{}); } catch(e) {}}
+    document.querySelectorAll("button").forEach(b => b.addEventListener("click", safePlayClick));
 
-    /* THEME SWITCH */
+    // theme
     const htmlEl = document.documentElement;
     const themeFade = document.getElementById("themeFade");
     const themeToggle = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");
-
     function applyTheme(mode) {
-      themeFade.style.opacity = "1";
+      if (themeFade) themeFade.style.opacity = "1";
       setTimeout(() => {
-        if (mode === "dark") { htmlEl.classList.add("dark"); themeIcon.textContent = "🌙"; }
-        else { htmlEl.classList.remove("dark"); themeIcon.textContent = "☀️"; }
-        themeFade.style.opacity = "0";
+        if (mode === "dark") { htmlEl.classList.add("dark"); if (themeIcon) themeIcon.textContent = "🌙"; }
+        else { htmlEl.classList.remove("dark"); if (themeIcon) themeIcon.textContent = "☀️"; }
+        if (themeFade) themeFade.style.opacity = "0";
       }, 240);
     }
     const saved = localStorage.getItem("theme") || "dark";
     if (saved === "dark") htmlEl.classList.add("dark"); else htmlEl.classList.remove("dark");
-    themeIcon.textContent = saved === "dark" ? "🌙" : "☀️";
-    themeToggle.addEventListener("click", () => {
+    if (themeIcon) themeIcon.textContent = saved === "dark" ? "🌙" : "☀️";
+    if (themeToggle) themeToggle.addEventListener("click", () => {
       const next = htmlEl.classList.contains("dark") ? "light" : "dark";
       applyTheme(next);
       localStorage.setItem("theme", next);
     });
 
-    /* SLIDER SOUND + strictness label */
+    // slider (only one handler, guarded)
     let lastSlider = 0;
     const slider = document.getElementById("sensitivity");
-    slider.addEventListener("input", () => {
-      const now = Date.now();
-      if (now - lastSlider > 100) {
-        sliderSfx.currentTime = 0; sliderSfx.play().catch(()=>{});
-        lastSlider = now;
-      }
-      const v = Number(slider.value);
-      const st = document.getElementById("strictText");
-      if (v < 40) { st.textContent = "Low"; st.style.color = "#00ff87"; }
-      else if (v < 60) { st.textContent = "Medium"; st.style.color = "#ffdd00"; }
-      else { st.textContent = "High"; st.style.color = "#ff004c"; }
+    const strictText = document.getElementById("strictText");
+    if (slider) {
+      slider.addEventListener("input", (e) => {
+        const now = Date.now();
+        if (now - lastSlider > 100) {
+          try { sliderSfx.currentTime = 0; sliderSfx.play().catch(()=>{}); } catch(e){}
+          lastSlider = now;
+        }
+        const v = Number(e.target.value);
+        if (strictText) {
+          if (v < 40) { strictText.textContent = "Low"; strictText.style.color = "#00ff87"; }
+          else if (v < 60) { strictText.textContent = "Medium"; strictText.style.color = "#ffdd00"; }
+          else { strictText.textContent = "High"; strictText.style.color = "#ff004c"; }
+        }
+        window.STRICTNESS_THRESHOLD = v / 100;
+      });
+    }
 
-      if (typeof window.STRICTNESS_THRESHOLD !== "undefined") window.STRICTNESS_THRESHOLD = v / 100;
-    });
-
-    /* ---------------------
-       FPS meter helpers
-       --------------------- */
+    /* FPS & Recording helpers */
     const fpsDisplay = document.getElementById("fpsDisplay");
-    // provide updateFPS used by backend
     window._fpsData = { last: performance.now(), frames: 0 };
     window.updateFPS = function(now){
       window._fpsData.frames++;
@@ -394,9 +587,6 @@
       }
     };
 
-    /* ---------------------
-       Focus data logging & export
-       --------------------- */
     const focusLog = [];
     function logFocusEntry(total, focusedCount) {
       const pct = total ? Math.round((focusedCount / total) * 100) : 0;
@@ -424,12 +614,12 @@
       downloadBlob(blob, `focus-data-${(new Date()).toISOString().replace(/[:.]/g,'-')}.csv`);
     }
 
-    document.getElementById("exportCSVBtn").addEventListener("click", exportCSV);
-    document.getElementById("exportJSONBtn").addEventListener("click", exportJSON);
+    const exportCsvBtn = document.getElementById("exportCSVBtn");
+    const exportJsonBtn = document.getElementById("exportJSONBtn");
+    if (exportCsvBtn) exportCsvBtn.addEventListener("click", exportCSV);
+    if (exportJsonBtn) exportJsonBtn.addEventListener("click", exportJSON);
 
-    /* ---------------------
-       Recording: WebM capture + MP4 conversion
-       --------------------- */
+    /* Recording: start/stop/export */
     const startRecBtn = document.getElementById("startRecBtn");
     const stopRecBtn = document.getElementById("stopRecBtn");
     const exportVideoBtn = document.getElementById("exportVideoBtn");
@@ -437,8 +627,8 @@
     let mediaRecorder = null;
     let recordedChunks = [];
     let recordedWebMBlob = null;
-    let FFmpegCore = null;
     let ffmpegLoaded = false;
+    let FFmpegCore = null;
 
     function getCanvasStream() {
       const canvas = document.getElementById("canvas");
@@ -446,7 +636,7 @@
       return canvas.captureStream(30); // 30 fps
     }
 
-    startRecBtn.addEventListener("click", () => {
+    if (startRecBtn) startRecBtn.addEventListener("click", () => {
       recordedChunks = [];
       const stream = getCanvasStream();
       if (!stream) { alert("Canvas stream unavailable."); return; }
@@ -461,50 +651,44 @@
       mediaRecorder.ondataavailable = (ev) => { if (ev.data && ev.data.size) recordedChunks.push(ev.data); };
       mediaRecorder.onstop = () => {
         recordedWebMBlob = new Blob(recordedChunks, { type: "video/webm" });
-        exportVideoBtn.disabled = false;
+        if (exportVideoBtn) exportVideoBtn.disabled = false;
         alert("Recording stopped. Click EXPORT MP4 to convert.");
       };
 
       mediaRecorder.start();
       startRecBtn.disabled = true;
-      stopRecBtn.disabled = false;
-      exportVideoBtn.disabled = true;
+      if (stopRecBtn) stopRecBtn.disabled = false;
+      if (exportVideoBtn) exportVideoBtn.disabled = true;
     });
 
-    stopRecBtn.addEventListener("click", () => {
+    if (stopRecBtn) stopRecBtn.addEventListener("click", () => {
       if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
-      startRecBtn.disabled = false;
-      stopRecBtn.disabled = true;
+      if (startRecBtn) startRecBtn.disabled = false;
+      if (stopRecBtn) stopRecBtn.disabled = true;
     });
 
     async function ensureFFmpeg() {
       if (ffmpegLoaded) return FFmpegCore;
-      // FFmpeg global is loaded via script tag -> window.FFmpeg
       const { createFFmpeg, fetchFile } = FFmpeg;
       FFmpegCore = createFFmpeg({ log: true });
       await FFmpegCore.load();
       ffmpegLoaded = true;
-      // attach fetchFile for convenience
       FFmpegCore.fetchFile = fetchFile;
       return FFmpegCore;
     }
 
-    exportVideoBtn.addEventListener("click", async () => {
+    if (exportVideoBtn) exportVideoBtn.addEventListener("click", async () => {
       if (!recordedWebMBlob) { alert("No recording to export."); return; }
       exportVideoBtn.disabled = true;
       exportVideoBtn.textContent = "Converting...";
 
       try {
         const ff = await ensureFFmpeg();
-        // write file
         ff.FS('writeFile', 'input.webm', await ff.fetchFile(recordedWebMBlob));
-        // convert
-        // mp4 using mpeg4 codec; tune bitrate to 1200k
         await ff.run('-i', 'input.webm', '-c:v', 'mpeg4', '-b:v', '1200k', 'output.mp4');
         const out = ff.FS('readFile', 'output.mp4');
         const mp4Blob = new Blob([out.buffer], { type: 'video/mp4' });
         downloadBlob(mp4Blob, `focus-recording-${(new Date()).toISOString().replace(/[:.]/g,'-')}.mp4`);
-        // cleanup
         try { ff.FS('unlink', 'input.webm'); } catch(e) {}
         try { ff.FS('unlink', 'output.mp4'); } catch(e) {}
       } catch (err) {
@@ -516,29 +700,15 @@
       }
     });
 
-    /* ---------------------
-       Ensure mini buttons visibility on dynamic theme change
-       --------------------- */
-    const miniBtns = document.querySelectorAll('.mini-btn');
-    function refreshMiniBtnColors() {
-      // no-op because CSS handles :root:not(.dark), but keep for future
-    }
-    // observe theme change
-    const themeObserver = new MutationObserver(() => refreshMiniBtnColors());
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-    /* ---------------------
-       Backend MoveNet code (wired safely)
-       --------------------- */
-
-    // Expose a global variable for strictness
+    /* BACKEND MOVE NET (unchanged logic but safe guards) */
     window.STRICTNESS_THRESHOLD = 0.5;
 
     let detector;
     let isRunning = false;
+
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext ? canvas.getContext("2d") : null;
+    const ctx = (canvas && canvas.getContext) ? canvas.getContext("2d") : null;
 
     const loader = document.getElementById("loader");
     const initBtn = document.getElementById("initBtn");
@@ -546,20 +716,8 @@
 
     const countDisplay = document.getElementById("countDisplay");
     const focusDisplay = document.getElementById("focusDisplay");
-    const senseSlider = document.getElementById("sensitivity");
-    const strictText = document.getElementById("strictText");
 
-    if (senseSlider) {
-      senseSlider.addEventListener("input", (e) => {
-        const v = Number(e.target.value);
-        window.STRICTNESS_THRESHOLD = v / 100;
-        if (strictText) {
-          if (v < 40) { strictText.textContent = "Low"; strictText.style.color = "#00ff87"; }
-          else if (v < 60) { strictText.textContent = "Medium"; strictText.style.color = "#ffdd00"; }
-          else { strictText.textContent = "High"; strictText.style.color = "#ff004c"; }
-        }
-      });
-    }
+    // senseSlider already handled above
 
     async function initSystem() {
       if (isRunning) return;
@@ -567,15 +725,19 @@
       if (initBtn) initBtn.classList.add("hidden");
       if (stopBtn) stopBtn.classList.remove("hidden");
       if (loader) loader.style.display = "flex";
-
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
-        video.srcObject = stream;
-        await video.play();
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 1280, height: 720 }
+        });
+        if (video) {
+          video.srcObject = stream;
+          await video.play();
+          // set canvas size after play
+          canvas.width = video.videoWidth || 1280;
+          canvas.height = video.videoHeight || 720;
+        }
 
-        canvas.width = video.videoWidth || 1280;
-        canvas.height = video.videoHeight || 720;
-
+        // initialize MoveNet detector
         detector = await poseDetection.createDetector(
           poseDetection.SupportedModels.MoveNet,
           {
@@ -603,7 +765,7 @@
         video.srcObject.getTracks().forEach(t => t.stop());
         video.srcObject = null;
       }
-      if (ctx && canvas) ctx.clearRect(0,0,canvas.width, canvas.height);
+      if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
       if (stopBtn) stopBtn.classList.add("hidden");
       if (initBtn) initBtn.classList.remove("hidden");
       if (countDisplay) countDisplay.textContent = "0";
@@ -613,9 +775,9 @@
     async function renderLoop() {
       if (!isRunning) return;
       const now = performance.now();
-      // update fps via global helper
       try { window.updateFPS && window.updateFPS(now); } catch(e){}
       try {
+        if (!detector || !video) { requestAnimationFrame(renderLoop); return; }
         const poses = await detector.estimatePoses(video);
         drawResults(poses);
       } catch (e) {
@@ -627,24 +789,18 @@
     function drawResults(poses) {
       if (!ctx || !canvas || !video) return;
       try { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); } catch(e){}
-
       let focusedCount = 0;
       let total = 0;
-
       (poses || []).forEach(pose => {
         if (!pose) return;
-        // pose.score may be undefined for multi-pose; fallback to keypoints avg
         const keypoints = pose.keypoints || [];
         if (!keypoints.length) return;
         const poseScore = (typeof pose.score === "number") ? pose.score : (keypoints.reduce((s,k)=>s+(k.score||0),0)/keypoints.length);
         if (poseScore < 0.25) return;
-
         total++;
-
         const nose = keypoints.find(k => (k.name === "nose" || k.part === "nose"));
         const ls = keypoints.find(k => (k.name === "left_shoulder" || k.part === "left_shoulder"));
         const rs = keypoints.find(k => (k.name === "right_shoulder" || k.part === "right_shoulder"));
-
         let focused = false;
         if (ls && rs && (ls.score||0) > 0.3 && (rs.score||0) > 0.3) {
           const center = (ls.x + rs.x) / 2;
@@ -656,7 +812,6 @@
           }
         }
         if (focused) focusedCount++;
-
         const color = focused ? "#00ff87" : "#ff004c";
         if (nose && typeof nose.x === "number" && typeof nose.y === "number") {
           try {
@@ -671,22 +826,18 @@
           } catch(e){}
         }
       });
-
       if (countDisplay) countDisplay.textContent = total;
       const pct = total ? Math.round((focusedCount/total)*100) : 0;
       if (focusDisplay) {
         focusDisplay.textContent = pct + "%";
         focusDisplay.style.color = pct > 80 ? "#00ff87" : pct > 50 ? "#ffdd00" : "#ff004c";
       }
-
-      // log
       logFocusEntry(total, focusedCount);
     }
 
     if (initBtn) initBtn.addEventListener("click", initSystem);
     if (stopBtn) stopBtn.addEventListener("click", stopSystem);
 
-    /* End backend */
   </script>
 </body>
 </html>

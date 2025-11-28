@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOCUS AI — Student Database</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7ff;
+      --text: #0a0a0a;
+      --glass: rgba(255,255,255,0.35);
+      --border: rgba(0,0,0,0.18);
+    }
+
+    .dark {
+      --bg: radial-gradient(circle at top, #0d111e, #05060a 60%);
+      --text: white;
+      --glass: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.15);
+    }
+
+    html {
+      background: var(--bg);
+      transition: background .45s ease, color .45s ease;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Poppins", sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    /* Theme Toggle */
+    #themeToggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--glass);
+      border: 2px solid #4cf0ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 999;
+      transition: 0.25s;
+    }
+
+    #themeToggle:hover {
+      transform: scale(1.1);
+    }
+
+    #themeIcon {
+      font-size: 22px;
+    }
+
+    /* Inputs fix */
+    input, select {
+      color: var(--text) !important;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid var(--border);
+      padding: 10px;
+      width: 100%;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    .dark input {
+      background: rgba(255,255,255,0.08);
+    }
+
+    input::placeholder {
+      color: var(--text);
+      opacity: 0.7;
+    }
+
+    /* Student card */
+    .student-card {
+      transition: 0.25s ease;
+    }
+
+    .student-card:hover {
+      transform: scale(1.04);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Theme Toggle -->
+  <button id="themeToggle">
+    <span id="themeIcon">🌙</span>
+  </button>
+
+  <!-- HEADER -->
+  <header class="p-5 flex justify-between items-center">
+    <h1 class="text-3xl font-bold"
+        style="background: linear-gradient(90deg,#4cf0e2,#4e7bff,#c744ff);
+               -webkit-text-fill-color: transparent;
+               -webkit-background-clip: text;">
+      Student Database
+    </h1>
+    <button onclick="location.href='run.html'" 
+            class="px-5 py-2 glass font-semibold">
+      ← Back to System
+    </button>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="p-6">
+
+    <!-- Add Student Card -->
+    <div class="glass p-6 mb-8 max-w-xl mx-auto">
+      <h2 class="text-xl font-bold mb-3">Add Student</h2>
+
+      <label class="text-sm">Student Name</label>
+      <input id="studentName" type="text" placeholder="Enter student name" class="mb-4">
+
+      <label class="text-sm">Student Photo</label>
+      <input id="studentPhoto" type="file" accept="image/*" class="mb-4">
+
+      <button id="addStudentBtn" class="w-full py-3 glass font-bold">
+        Add Student
+      </button>
+    </div>
+
+    <!-- Student List -->
+    <h2 class="text-2xl font-bold mb-3">Registered Students</h2>
+
+    <div id="studentList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+
+  </main>
+
+  <script>
+    /* ---------------------
+       Theme Toggle
+       --------------------- */
+    const htmlEl = document.documentElement;
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+
+    let saved = localStorage.getItem("theme") || "dark";
+
+    if (saved === "dark") htmlEl.classList.add("dark");
+    else htmlEl.classList.remove("dark");
+
+    themeIcon.textContent = saved === "dark" ? "🌙" : "☀️";
+
+    themeToggle.onclick = () => {
+      const next = htmlEl.classList.contains("dark") ? "light" : "dark";
+      if (next === "dark") htmlEl.classList.add("dark");
+      else htmlEl.classList.remove("dark");
+      themeIcon.textContent = next === "dark" ? "🌙" : "☀️";
+      localStorage.setItem("theme", next);
+    };
+
+    /* ---------------------
+       IndexedDB Setup
+       --------------------- */
+    let db;
+
+    const request = indexedDB.open("FocusAI_DB", 1);
+
+    request.onupgradeneeded = function (event) {
+      db = event.target.result;
+      const store = db.createObjectStore("students", { keyPath: "id", autoIncrement: true });
+      store.createIndex("name", "name", { unique: false });
+    };
+
+    request.onsuccess = function (event) {
+      db = event.target.result;
+      loadStudents();
+    };
+
+    /* ---------------------
+       Add Student
+       --------------------- */
+    document.getElementById("addStudentBtn").onclick = async () => {
+      const name = document.getElementById("studentName").value.trim();
+      const file = document.getElementById("studentPhoto").files[0];
+
+      if (!name || !file) {
+        alert("Please enter name and choose a photo");
+        return;
+      }
+
+      const base64 = await toBase64(file);
+
+      const tx = db.transaction("students", "readwrite");
+      tx.objectStore("students").add({
+        name: name,
+        photo: base64,
+        embedding: null
+      });
+
+      tx.oncomplete = () => {
+        loadStudents();
+        document.getElementById("studentName").value = "";
+        document.getElementById("studentPhoto").value = "";
+      };
+    };
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+
+    /* ---------------------
+       Load Students
+       --------------------- */
+    function loadStudents() {
+      const list = document.getElementById("studentList");
+      list.innerHTML = "";
+
+      const tx = db.transaction("students", "readonly");
+      const store = tx.objectStore("students");
+
+      store.openCursor().onsuccess = function (e) {
+        const cursor = e.target.result;
+        if (cursor) {
+          const stu = cursor.value;
+
+          const card = document.createElement("div");
+          card.className = "glass student-card p-3";
+
+          card.innerHTML = `
+            <img src="${stu.photo}" class="w-full h-32 object-cover rounded-md mb-3">
+            <div class="font-bold">${stu.name}</div>
+            <button class="mt-2 w-full py-2 glass" onclick="deleteStudent(${stu.id})">
+              Delete
+            </button>
+          `;
+
+          list.appendChild(card);
+          cursor.continue();
+        }
+      };
+    }
+
+    /* ---------------------
+       Delete Student
+       --------------------- */
+    function deleteStudent(id) {
+      const tx = db.transaction("students", "readwrite");
+      tx.objectStore("students").delete(id);
+      tx.oncomplete = loadStudents;
+    }
+  </script>
+
+</body>
+</html>

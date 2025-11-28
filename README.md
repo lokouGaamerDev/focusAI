@@ -1,3 +1,15 @@
+(How to Run
+
+Download or clone the project folder.
+
+Open the folder on your computer.
+
+Locate the file:
+home.html
+
+run it)
+
+
 FOCUS AI — Student Attention Detection System
 
 FOCUS AI is a browser-based real-time attention monitoring system designed for classrooms.

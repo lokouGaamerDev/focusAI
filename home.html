@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FOCUS AI — Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7ff;
+      --text: #0a0a0a;
+      --glass: rgba(255, 255, 255, 0.35);
+      --glow: rgba(80, 190, 255, 0.45);
+    }
+
+    .dark {
+      --bg: radial-gradient(circle at top, #0d111e, #05060a 60%);
+      --text: #ffffff;
+      --glass: rgba(255, 255, 255, 0.06);
+      --glow: rgba(0, 230, 255, 0.4);
+    }
+
+    html {
+      background: var(--bg);
+      transition: background .5s ease, color .5s ease;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+    }
+
+    .title {
+      font-size: 48px;
+      font-weight: 900;
+      background: linear-gradient(92deg, #4cf0e2, #4e7bff, #c744ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200%;
+      animation: glowTitle 4s linear infinite;
+    }
+
+    @keyframes glowTitle {
+      0% { background-position: 0%; }
+      100% { background-position: 200%; }
+    }
+
+    /* Logo intro */
+    #logo {
+      width: 130px;
+      opacity: 0;
+      transform: translateY(20px) scale(.8);
+      filter: drop-shadow(0 0 20px var(--glow));
+      transition: 1s ease;
+    }
+
+    .loaded #logo {
+      opacity: 1 !important;
+      transform: translateY(0) scale(1) !important;
+    }
+
+    /* Start button */
+    .start-btn {
+      margin-top: 28px;
+      padding: 14px 38px;
+      font-weight: 700;
+      border-radius: 14px;
+      color: white;
+      font-size: 18px;
+      background: linear-gradient(90deg, #4cc9f0, #4361ee);
+      box-shadow: 0 0 25px rgba(76, 201, 240, 0.4);
+      transition: .25s;
+    }
+
+    .start-btn:hover {
+      transform: scale(1.07);
+      box-shadow: 0 0 35px rgba(76, 201, 240, 0.65);
+    }
+
+    /* Theme toggle */
+    #themeToggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass);
+      border: 2px solid #4cf0ff;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      z-index: 999;
+      transition: .25s;
+    }
+
+    #themeToggle:hover {
+      transform: scale(1.1);
+    }
+
+    #themeIcon {
+      font-size: 22px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Theme toggle -->
+  <button id="themeToggle">
+    <span id="themeIcon">🌙</span>
+  </button>
+
+  <!-- MAIN HOMEPAGE CARD -->
+  <div class="glass p-10 px-14 flex flex-col items-center text-center shadow-xl"
+       style="box-shadow:0 0 50px var(--glow);">
+
+    <img id="logo" src="ailogo.png">
+
+    <h1 class="title mt-6">FOCUS AI</h1>
+    <p class="mt-3 text-gray-300 text-sm">
+      Advanced Student Attention Detection System
+    </p>
+
+    <button class="start-btn" onclick="location.href='Run.html'">
+      Launch System
+    </button>
+  </div>
+
+  <script>
+    /* Fade-in logo */
+    setTimeout(() => document.body.classList.add("loaded"), 100);
+
+    /* THEME SWITCH */
+    const htmlEl = document.documentElement;
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+
+    const saved = localStorage.getItem("theme") || "dark";
+    if (saved === "dark") htmlEl.classList.add("dark");
+    else htmlEl.classList.remove("dark");
+
+    themeIcon.textContent = saved === "dark" ? "🌙" : "☀️";
+
+    themeToggle.onclick = () => {
+      const next = htmlEl.classList.contains("dark") ? "light" : "dark";
+      if (next === "dark") htmlEl.classList.add("dark");
+      else htmlEl.classList.remove("dark");
+      themeIcon.textContent = next === "dark" ? "🌙" : "☀️";
+      localStorage.setItem("theme", next);
+    };
+  </script>
+
+</body>
+</html>

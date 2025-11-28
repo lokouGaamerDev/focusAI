@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FOCUS AI — Student Attention Detection</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- TensorFlow libs -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
+  <!-- FFmpeg WASM (MP4 converter) -->
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7ff;
+      --text: #0a0a0a;
+      --glass: rgba(255, 255, 255, 0.45);
+      --highlight: #4e5bff;
+      --glow: rgba(70, 90, 255, 0.45);
+    }
+
+    .dark {
+      --bg: radial-gradient(circle at top, #111525, #05060a 60%);
+      --text: #ffffff;
+      --glass: rgba(255, 255, 255, 0.08);
+      --highlight: #4cf0ff;
+      --glow: rgba(0, 255, 200, 0.35);
+    }
+
+    html { transition: background .55s ease, color .55s ease; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Poppins", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(14px) saturate(140%);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      margin: 12px;
+      gap: 12px;
+    }
+
+    .header-left { display: flex; flex-direction: column; }
+
+    .header-title {
+      font-size: 34px;
+      font-weight: 900;
+      background: linear-gradient(92deg, #4cf0e2, #4e7bff, #c744ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      opacity: 0;
+      transform: translateY(-12px);
+      animation: fadeTitle .6s cubic-bezier(.22,.9,.24,1) forwards .8s,
+                 neonMove 5s linear infinite;
+    }
+
+    @keyframes fadeTitle { to { opacity:1; transform:translateY(0);} }
+    @keyframes neonMove { 0%{background-position:0%} 100%{background-position:200%} }
+
+    .stat-number { font-size: 28px; font-weight: 800; }
+
+    .header-right { display:flex; gap:18px; align-items:center; }
+    .stat-block { text-align:center; }
+    .small-label { font-size:12px; opacity:.85; text-transform:uppercase; }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #canvas {
+      width: 1200px;
+      max-width: 92vw;
+      height: 640px;
+      max-height: 62vh;
+      border-radius: 14px;
+      background: #000;
+      box-shadow: 0 0 30px var(--glow);
+    }
+
+    .strict-card {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type=range] {
+      width: 180px;
+      height: 6px;
+      background: linear-gradient(90deg, #00ff87, #ffdd00, #ff004c);
+      border-radius: 999px;
+      -webkit-appearance: none;
+      outline: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      border: 3px solid var(--highlight);
+    }
+
+    footer {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .action-btn {
+      width: 180px; padding:12px;
+      color:white; border:none;
+      border-radius:12px; font-weight:700;
+    }
+
+    .start-btn { background:linear-gradient(90deg,#2ee6ff,#4870ff); }
+    .stop-btn { background:linear-gradient(90deg,#ff3d5a,#d90429); }
+
+    /* THEME TOGGLE bottom right */
+    #themeToggle {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 52px; height: 52px;
+      display:flex; align-items:center; justify-content:center;
+      background: var(--glass);
+      border-radius: 50%;
+      border: 2px solid var(--highlight);
+      backdrop-filter: blur(12px);
+      cursor:pointer;
+      z-index:999;
+      transition: .25s;
+    }
+    #themeToggle:hover { transform: scale(1.1); }
+    #themeIcon { font-size:22px; }
+
+    .theme-fade {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 998;
+      background: var(--bg);
+      transition: opacity .5s ease;
+    }
+
+    /* LOADER */
+    #loader {
+      position:absolute; inset:0;
+      display:none; align-items:center; justify-content:center;
+      background:rgba(0,0,0,0.4); backdrop-filter:blur(6px);
+      z-index:300;
+    }
+    #loader .spinner {
+      width:60px; height:60px;
+      border-radius:50%;
+      border:6px solid rgba(255,255,255,0.12);
+      border-top-color:var(--highlight);
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to{ transform:rotate(360deg);} }
+
+    /* Recording mini buttons */
+    .record-controls { display:flex; gap:8px; align-items:center; }
+    .mini-btn {
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.06);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color:white;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .mini-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+    /* FIX: LIGHT THEME VISIBILITY */
+    :root:not(.dark) .mini-btn {
+      background: rgba(0,0,0,0.08) !important;
+      color:#111 !important;
+      border:1px solid rgba(0,0,0,0.15) !important;
+    }
+    :root:not(.dark) .mini-btn:hover {
+      background: rgba(0,0,0,0.12) !important;
+    }
+
+    /* INTRO */
+    @keyframes introPulse {
+      0% { filter:drop-shadow(0 0 12px #4cf0ff); }
+      50% { filter:drop-shadow(0 0 30px #4cf0ff); }
+      100% { filter:drop-shadow(0 0 12px #4cf0ff); }
+    }
+
+    @media(max-width:900px){
+      header{flex-direction:column; text-align:center;}
+      #canvas{width:92vw; height:52vh;}
+      .action-btn{width:90%;}
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- INTRO -->
+  <div id="introScreen" style="position:fixed; inset:0; background:black; display:flex; justify-content:center; align-items:center; z-index:2000; transition:.8s;">
+    <img id="introLogo" src="ailogo.png" style="width:160px; opacity:0; transform:scale(.5); transition:.8s; filter:drop-shadow(0 0 12px #4cf0ff);">
+  </div>
+
+  <div id="themeFade" class="theme-fade"></div>
+  <button id="themeToggle" class="glass"><span id="themeIcon">🌙</span></button>
+
+  <header class="glass">
+
+    <div class="header-left">
+      <div class="header-title">FOCUS AI</div>
+      <div style="font-size:12px;opacity:.85;">Student Attention Detection System</div>
+    </div>
+
+    <div class="strict-card glass">
+      <div style="font-size:12px;opacity:.85;">Strictness</div>
+      <div id="strictText" style="font-size:12px;color:var(--highlight);">Medium</div>
+      <input id="sensitivity" type="range" min="20" max="80" value="50">
+    </div>
+
+    <div class="header-right">
+      <div class="stat-block">
+        <div class="small-label">Students</div>
+        <div id="countDisplay" class="stat-number" style="color:#4cc9f0;">0</div>
+      </div>
+
+      <div class="stat-block">
+        <div class="small-label">Focus</div>
+        <div id="focusDisplay" class="stat-number" style="color:#ff7ab6;">--</div>
+      </div>
+
+      <div class="stat-block">
+        <div class="small-label">FPS</div>
+        <div id="fpsDisplay" class="stat-number" style="color:#ffd166;">--</div>
+      </div>
+
+      <!-- Recording Controls -->
+      <div class="record-controls">
+        <button id="startRecBtn" class="mini-btn">REC</button>
+        <button id="stopRecBtn" class="mini-btn" disabled>STOP</button>
+        <button id="exportVideoBtn" class="mini-btn" disabled>EXPORT MP4</button>
+        <button id="exportCSVBtn" class="mini-btn">CSV</button>
+        <button id="exportJSONBtn" class="mini-btn">JSON</button>
+      </div>
+    </div>
+
+  </header>
+
+  <main>
+    <div id="loader"><div class="spinner"></div></div>
+    <video id="video" class="hidden" playsinline></video>
+    <canvas id="canvas"></canvas>
+  </main>
+
+  <footer>
+    <button id="initBtn" class="action-btn start-btn">START SYSTEM</button>
+    <button id="stopBtn" class="action-btn stop-btn hidden">STOP SYSTEM</button>
+  </footer>
+  <!-- ==================== PART 2: SCRIPTS (intro, UI, FPS, recording, backend) ==================== -->
+  <script>
+    /* INTRO ANIMATION */
+    window.addEventListener("load", () => {
+      const intro = document.getElementById("introScreen");
+      const logo = document.getElementById("introLogo");
+
+      setTimeout(() => {
+        logo.style.opacity = "1";
+        logo.style.transform = "scale(1)";
+        logo.style.animation = "introPulse 2s infinite";
+      }, 150);
+
+      setTimeout(() => {
+        logo.style.opacity = "0";
+        logo.style.transform = "translateY(-40px) scale(.8)";
+      }, 1850);
+
+      setTimeout(() => { intro.style.opacity = "0"; }, 2400);
+      setTimeout(() => { intro.style.display = "none"; }, 3100);
+    });
+
+    /* AUDIO + UNLOCK */
+    const clickSfx = new Audio("click.wav");
+    clickSfx.preload = "auto"; clickSfx.volume = 0.45;
+
+    const sliderSfx = new Audio("slider.wav");
+    sliderSfx.preload = "auto"; sliderSfx.volume = 0.14;
+
+    function unlockAudioAPIs() {
+      [clickSfx, sliderSfx].forEach(a => {
+        try {
+          const p = a.play();
+          if (p && p.then) p.then(() => { a.pause(); a.currentTime = 0; }).catch(()=>{});
+          else { a.pause(); a.currentTime = 0; }
+        } catch (e) {}
+      });
+      document.removeEventListener("pointerdown", unlockAudioAPIs);
+    }
+    document.addEventListener("pointerdown", unlockAudioAPIs, { once: true, passive: true });
+
+    function safePlayClick(){
+      try { clickSfx.currentTime = 0; clickSfx.play().catch(()=>{}); } catch(e){}
+    }
+    document.querySelectorAll("button").forEach(b=>b.addEventListener("click", safePlayClick));
+
+    /* THEME SWITCH */
+    const htmlEl = document.documentElement;
+    const themeFade = document.getElementById("themeFade");
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+
+    function applyTheme(mode) {
+      themeFade.style.opacity = "1";
+      setTimeout(() => {
+        if (mode === "dark") { htmlEl.classList.add("dark"); themeIcon.textContent = "🌙"; }
+        else { htmlEl.classList.remove("dark"); themeIcon.textContent = "☀️"; }
+        themeFade.style.opacity = "0";
+      }, 240);
+    }
+    const saved = localStorage.getItem("theme") || "dark";
+    if (saved === "dark") htmlEl.classList.add("dark"); else htmlEl.classList.remove("dark");
+    themeIcon.textContent = saved === "dark" ? "🌙" : "☀️";
+    themeToggle.addEventListener("click", () => {
+      const next = htmlEl.classList.contains("dark") ? "light" : "dark";
+      applyTheme(next);
+      localStorage.setItem("theme", next);
+    });
+
+    /* SLIDER SOUND + strictness label */
+    let lastSlider = 0;
+    const slider = document.getElementById("sensitivity");
+    slider.addEventListener("input", () => {
+      const now = Date.now();
+      if (now - lastSlider > 100) {
+        sliderSfx.currentTime = 0; sliderSfx.play().catch(()=>{});
+        lastSlider = now;
+      }
+      const v = Number(slider.value);
+      const st = document.getElementById("strictText");
+      if (v < 40) { st.textContent = "Low"; st.style.color = "#00ff87"; }
+      else if (v < 60) { st.textContent = "Medium"; st.style.color = "#ffdd00"; }
+      else { st.textContent = "High"; st.style.color = "#ff004c"; }
+
+      if (typeof window.STRICTNESS_THRESHOLD !== "undefined") window.STRICTNESS_THRESHOLD = v / 100;
+    });
+
+    /* ---------------------
+       FPS meter helpers
+       --------------------- */
+    const fpsDisplay = document.getElementById("fpsDisplay");
+    // provide updateFPS used by backend
+    window._fpsData = { last: performance.now(), frames: 0 };
+    window.updateFPS = function(now){
+      window._fpsData.frames++;
+      const dt = now - window._fpsData.last;
+      if (dt >= 1000) {
+        const fps = Math.round((window._fpsData.frames * 1000) / dt);
+        if (fpsDisplay) fpsDisplay.textContent = fps;
+        window._fpsData.frames = 0;
+        window._fpsData.last = now;
+      }
+    };
+
+    /* ---------------------
+       Focus data logging & export
+       --------------------- */
+    const focusLog = [];
+    function logFocusEntry(total, focusedCount) {
+      const pct = total ? Math.round((focusedCount / total) * 100) : 0;
+      focusLog.push({ t: new Date().toISOString(), total: total, focused: focusedCount, pct: pct });
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(focusLog, null, 2)], { type: "application/json" });
+      downloadBlob(blob, `focus-data-${(new Date()).toISOString().replace(/[:.]/g,'-')}.json`);
+    }
+
+    function exportCSV() {
+      if (!focusLog.length) { alert("No focus data to export."); return; }
+      const header = ["timestamp","total","focused","pct"];
+      const rows = focusLog.map(r => [r.t, r.total, r.focused, r.pct].join(","));
+      const csv = [header.join(","), ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      downloadBlob(blob, `focus-data-${(new Date()).toISOString().replace(/[:.]/g,'-')}.csv`);
+    }
+
+    document.getElementById("exportCSVBtn").addEventListener("click", exportCSV);
+    document.getElementById("exportJSONBtn").addEventListener("click", exportJSON);
+
+    /* ---------------------
+       Recording: WebM capture + MP4 conversion
+       --------------------- */
+    const startRecBtn = document.getElementById("startRecBtn");
+    const stopRecBtn = document.getElementById("stopRecBtn");
+    const exportVideoBtn = document.getElementById("exportVideoBtn");
+
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let recordedWebMBlob = null;
+    let FFmpegCore = null;
+    let ffmpegLoaded = false;
+
+    function getCanvasStream() {
+      const canvas = document.getElementById("canvas");
+      if (!canvas) return null;
+      return canvas.captureStream(30); // 30 fps
+    }
+
+    startRecBtn.addEventListener("click", () => {
+      recordedChunks = [];
+      const stream = getCanvasStream();
+      if (!stream) { alert("Canvas stream unavailable."); return; }
+
+      try {
+        mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp9" });
+      } catch (e) {
+        try { mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm;codecs=vp8" }); }
+        catch (er) { mediaRecorder = new MediaRecorder(stream); }
+      }
+
+      mediaRecorder.ondataavailable = (ev) => { if (ev.data && ev.data.size) recordedChunks.push(ev.data); };
+      mediaRecorder.onstop = () => {
+        recordedWebMBlob = new Blob(recordedChunks, { type: "video/webm" });
+        exportVideoBtn.disabled = false;
+        alert("Recording stopped. Click EXPORT MP4 to convert.");
+      };
+
+      mediaRecorder.start();
+      startRecBtn.disabled = true;
+      stopRecBtn.disabled = false;
+      exportVideoBtn.disabled = true;
+    });
+
+    stopRecBtn.addEventListener("click", () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+      startRecBtn.disabled = false;
+      stopRecBtn.disabled = true;
+    });
+
+    async function ensureFFmpeg() {
+      if (ffmpegLoaded) return FFmpegCore;
+      // FFmpeg global is loaded via script tag -> window.FFmpeg
+      const { createFFmpeg, fetchFile } = FFmpeg;
+      FFmpegCore = createFFmpeg({ log: true });
+      await FFmpegCore.load();
+      ffmpegLoaded = true;
+      // attach fetchFile for convenience
+      FFmpegCore.fetchFile = fetchFile;
+      return FFmpegCore;
+    }
+
+    exportVideoBtn.addEventListener("click", async () => {
+      if (!recordedWebMBlob) { alert("No recording to export."); return; }
+      exportVideoBtn.disabled = true;
+      exportVideoBtn.textContent = "Converting...";
+
+      try {
+        const ff = await ensureFFmpeg();
+        // write file
+        ff.FS('writeFile', 'input.webm', await ff.fetchFile(recordedWebMBlob));
+        // convert
+        // mp4 using mpeg4 codec; tune bitrate to 1200k
+        await ff.run('-i', 'input.webm', '-c:v', 'mpeg4', '-b:v', '1200k', 'output.mp4');
+        const out = ff.FS('readFile', 'output.mp4');
+        const mp4Blob = new Blob([out.buffer], { type: 'video/mp4' });
+        downloadBlob(mp4Blob, `focus-recording-${(new Date()).toISOString().replace(/[:.]/g,'-')}.mp4`);
+        // cleanup
+        try { ff.FS('unlink', 'input.webm'); } catch(e) {}
+        try { ff.FS('unlink', 'output.mp4'); } catch(e) {}
+      } catch (err) {
+        console.error("FFmpeg error:", err);
+        alert("Conversion failed — check console.");
+      } finally {
+        exportVideoBtn.textContent = "EXPORT MP4";
+        exportVideoBtn.disabled = false;
+      }
+    });
+
+    /* ---------------------
+       Ensure mini buttons visibility on dynamic theme change
+       --------------------- */
+    const miniBtns = document.querySelectorAll('.mini-btn');
+    function refreshMiniBtnColors() {
+      // no-op because CSS handles :root:not(.dark), but keep for future
+    }
+    // observe theme change
+    const themeObserver = new MutationObserver(() => refreshMiniBtnColors());
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    /* ---------------------
+       Backend MoveNet code (wired safely)
+       --------------------- */
+
+    // Expose a global variable for strictness
+    window.STRICTNESS_THRESHOLD = 0.5;
+
+    let detector;
+    let isRunning = false;
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext ? canvas.getContext("2d") : null;
+
+    const loader = document.getElementById("loader");
+    const initBtn = document.getElementById("initBtn");
+    const stopBtn = document.getElementById("stopBtn");
+
+    const countDisplay = document.getElementById("countDisplay");
+    const focusDisplay = document.getElementById("focusDisplay");
+    const senseSlider = document.getElementById("sensitivity");
+    const strictText = document.getElementById("strictText");
+
+    if (senseSlider) {
+      senseSlider.addEventListener("input", (e) => {
+        const v = Number(e.target.value);
+        window.STRICTNESS_THRESHOLD = v / 100;
+        if (strictText) {
+          if (v < 40) { strictText.textContent = "Low"; strictText.style.color = "#00ff87"; }
+          else if (v < 60) { strictText.textContent = "Medium"; strictText.style.color = "#ffdd00"; }
+          else { strictText.textContent = "High"; strictText.style.color = "#ff004c"; }
+        }
+      });
+    }
+
+    async function initSystem() {
+      if (isRunning) return;
+      isRunning = true;
+      if (initBtn) initBtn.classList.add("hidden");
+      if (stopBtn) stopBtn.classList.remove("hidden");
+      if (loader) loader.style.display = "flex";
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+        video.srcObject = stream;
+        await video.play();
+
+        canvas.width = video.videoWidth || 1280;
+        canvas.height = video.videoHeight || 720;
+
+        detector = await poseDetection.createDetector(
+          poseDetection.SupportedModels.MoveNet,
+          {
+            modelType: poseDetection.movenet.modelType.MULTIPOSE_LIGHTNING,
+            enableSmoothing: true
+          }
+        );
+
+        if (loader) loader.style.display = "none";
+        renderLoop();
+      } catch (err) {
+        if (loader) loader.style.display = "none";
+        isRunning = false;
+        if (initBtn) initBtn.classList.remove("hidden");
+        if (stopBtn) stopBtn.classList.add("hidden");
+        alert("Error initializing system: " + err);
+        console.error(err);
+      }
+    }
+
+    function stopSystem() {
+      if (!isRunning) return;
+      isRunning = false;
+      if (video && video.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+        video.srcObject = null;
+      }
+      if (ctx && canvas) ctx.clearRect(0,0,canvas.width, canvas.height);
+      if (stopBtn) stopBtn.classList.add("hidden");
+      if (initBtn) initBtn.classList.remove("hidden");
+      if (countDisplay) countDisplay.textContent = "0";
+      if (focusDisplay) focusDisplay.textContent = "--";
+    }
+
+    async function renderLoop() {
+      if (!isRunning) return;
+      const now = performance.now();
+      // update fps via global helper
+      try { window.updateFPS && window.updateFPS(now); } catch(e){}
+      try {
+        const poses = await detector.estimatePoses(video);
+        drawResults(poses);
+      } catch (e) {
+        console.error("Pose estimation error:", e);
+      }
+      requestAnimationFrame(renderLoop);
+    }
+
+    function drawResults(poses) {
+      if (!ctx || !canvas || !video) return;
+      try { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); } catch(e){}
+
+      let focusedCount = 0;
+      let total = 0;
+
+      (poses || []).forEach(pose => {
+        if (!pose) return;
+        // pose.score may be undefined for multi-pose; fallback to keypoints avg
+        const keypoints = pose.keypoints || [];
+        if (!keypoints.length) return;
+        const poseScore = (typeof pose.score === "number") ? pose.score : (keypoints.reduce((s,k)=>s+(k.score||0),0)/keypoints.length);
+        if (poseScore < 0.25) return;
+
+        total++;
+
+        const nose = keypoints.find(k => (k.name === "nose" || k.part === "nose"));
+        const ls = keypoints.find(k => (k.name === "left_shoulder" || k.part === "left_shoulder"));
+        const rs = keypoints.find(k => (k.name === "right_shoulder" || k.part === "right_shoulder"));
+
+        let focused = false;
+        if (ls && rs && (ls.score||0) > 0.3 && (rs.score||0) > 0.3) {
+          const center = (ls.x + rs.x) / 2;
+          const width = Math.abs(ls.x - rs.x);
+          if (nose && (nose.score||0) > 0.3) {
+            const offset = Math.abs(nose.x - center);
+            const allowed = width * (1 - (window.STRICTNESS_THRESHOLD || 0.5));
+            if (offset < allowed) focused = true;
+          }
+        }
+        if (focused) focusedCount++;
+
+        const color = focused ? "#00ff87" : "#ff004c";
+        if (nose && typeof nose.x === "number" && typeof nose.y === "number") {
+          try {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(nose.x, nose.y, 40, 0, Math.PI*2);
+            ctx.stroke();
+            ctx.fillStyle = color;
+            ctx.font = "bold 14px Poppins, sans-serif";
+            ctx.fillText(focused ? "FOCUSED" : "DISTRACTED", nose.x - 30, nose.y - 50);
+          } catch(e){}
+        }
+      });
+
+      if (countDisplay) countDisplay.textContent = total;
+      const pct = total ? Math.round((focusedCount/total)*100) : 0;
+      if (focusDisplay) {
+        focusDisplay.textContent = pct + "%";
+        focusDisplay.style.color = pct > 80 ? "#00ff87" : pct > 50 ? "#ffdd00" : "#ff004c";
+      }
+
+      // log
+      logFocusEntry(total, focusedCount);
+    }
+
+    if (initBtn) initBtn.addEventListener("click", initSystem);
+    if (stopBtn) stopBtn.addEventListener("click", stopSystem);
+
+    /* End backend */
+  </script>
+</body>
+</html>

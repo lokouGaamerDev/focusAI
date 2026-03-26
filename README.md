@@ -1,233 +1,128 @@
-(How to Run
+# 🧠 FOCUS AI — Teacher Assistant System
 
-Download or clone the project folder.
+FOCUS AI is an AI-powered, browser-based system designed to help teachers monitor student attention in real time.
 
-Open the folder on your computer.
+It analyzes body posture and facial orientation to estimate focus levels, providing useful insights to improve classroom engagement.
 
-Locate the file:
-home.html
+> ⚡ Runs completely in the browser — no server or backend required.
 
-run it)
+---
 
+## 🚀 Features
 
-FOCUS AI — Student Attention Detection System
+### 🎥 Real-Time Attention Detection
 
-FOCUS AI is a browser-based real-time attention monitoring system designed for classrooms.
-It leverages TensorFlow.js, MoveNet, Face Mesh, Kalman tracking, IndexedDB, and a fully responsive TailwindCSS interface.
+* Multi-person detection using MoveNet
+* Head orientation & posture tracking
+* Nose deviation-based focus scoring
+* Adjustable strictness control
+* Smooth real-time processing
+* FPS monitor for performance
 
-This project runs entirely locally in the user's browser—no server, no backend.
+---
 
-📌 Features
-🎥 Real-Time Attention Detection
+### 📊 AI Dashboard
 
-(from run.html 
+* Live student count
+* Focus percentage tracking
+* Color-coded attention status
+* Auto-updating logs
 
-Run
+---
 
-)
+### 🎥 Recording & Export
 
-Multi-person detection using MoveNet
+* Record sessions using MediaRecorder
+* Save recordings (WebM → MP4 supported)
+* Export data as CSV or JSON
 
-Head orientation and shoulder-center alignment
+---
 
-Nose deviation–based focus scoring
+### 📚 Student Database
 
-Strictness-based sensitivity control
+* Add and manage students
+* Store student images locally
+* Data saved using IndexedDB
+* Clean card-based UI
 
-AI processing pipeline with requestAnimationFrame loop
+---
 
-FPS monitor for performance feedback
+### 🌗 UI & Experience
 
-Fully responsive video-canvas rendering
+* Light/Dark mode toggle
+* Responsive design (TailwindCSS)
+* Smooth animations & transitions
+* Sidebar navigation system
 
-📊 AI Metrics Dashboard
+---
 
-Student Count
+## 🧠 Tech Stack
 
-Focus Percentage
+**AI & Processing**
 
-Dynamic color-coded focus status
+* TensorFlow.js
+* MoveNet (MultiPose)
+* Custom attention detection logic
+* Kalman tracking
 
-HUD-style top display
+**Frontend**
 
-Auto-updating attention log
+* HTML, CSS (TailwindCSS)
+* JavaScript
+* Canvas + Video Processing
 
-🎥 Recording & Exporting
+**Storage**
 
-Canvas recording using MediaRecorder API
+* IndexedDB (local database)
 
-Save recordings as WebM
+---
 
-Convert WebM → MP4 (via FFmpeg WASM)
+## 📁 Project Structure
 
-Export attention data as:
-
-CSV
-
-JSON
-
-🧭 Navigation System
-
-Hamburger menu drawer
-
-Links to:
-
-Student Database
-
-Trainer (placeholder)
-
-Version display
-(from run.html drawer system)
-
-🌗 Theme System
-
-Light/Dark toggle
-
-Smooth transitions
-
-Remembers last selected theme using localStorage
-(from index.html, run.html, students.html
-
-
-home
-
- 
-
-Run
-
- 
-
-students
-
-)
-
-📚 Students Database
-
-(from students.html 
-
-students
-
-)
-
-A built-in offline student management system powered by IndexedDB:
-
-Features
-
-Add new students
-
-Upload & store student photos (Base64)
-
-Persistent data (saved locally in the browser)
-
-Student card grid UI
-
-Delete students
-
-Glassmorphism UI
-
-No server or external database required.
-
-🏠 Home Page
-
-(from index.html 
-
-home
-
-)
-
-Includes:
-
-Animated neon gradient title
-
-Logo intro effect
-
-Launch button
-
-Theme toggle
-
-Smooth fade-in animation
-
-🧠 Technology Stack
-AI & Processing
-
-TensorFlow.js
-
-MoveNet (Multipose)
-
-Custom attention classifier logic
-
-Kalman prediction for tracking stabilization
-
-Pose landmark extraction
-
-Real-time canvas rendering
-
-Frontend
-
-TailwindCSS
-
-Glassmorphism
-
-Animated intro screen
-
-Drawer navigation
-
-Canvas + video overlay UI
-
-Custom sound effects (buttons & sliders)
-
-Storage
-
-Browser-native IndexedDB
-
-Persistent student records
-
-📁 Project Structure
+```
 /
-├── index.html          # Home page
-├── run.html            # Main AI tracking dashboard
-├── students.html       # Student database
-├── Web.html            # Older experimental AI version
-├── ailogo.png          # Branding logo
-├── click.wav           # UI sound
-├── slider.wav          # UI sound
+├── index.html        # Home page
+├── run.html          # AI dashboard
+├── students.html     # Student database
+├── Web.html          # Experimental version
+├── assets/           # Images & sounds
 └── README.md
+```
 
-🚀 Getting Started
-1. Clone the Repository
-git clone https://github.com/yourusername/focus-ai.git
-cd focus-ai
+---
 
-2. Run the App
+## ⚙️ How to Run
 
-Just open index.html in any modern browser:
+1. Download or clone the repository
+2. Open the project folder
+3. Run:
 
-Chrome recommended
+```
+index.html
+```
 
-Ensure “Allow Camera Access” is enabled
+👉 Make sure to allow camera access in your browser.
 
-No backend needed.
+---
 
-📌 Requirements
+## 📌 Requirements
 
-Chrome / Firefox (latest versions)
+* Modern browser (Chrome recommended)
+* Camera-enabled device
+* JavaScript enabled
 
-Device with camera
+---
 
-JavaScript enabled
+## 🎯 Future Improvements
 
-🛠 Future Enhancements
+* Face recognition system
+* Automatic student identification
+* Attention heatmaps
+* Teacher login system
+* Cloud sync & analytics dashboard
 
-Face recognition using embeddings
+---
 
-Automatic student identification
+## 💡 Purpose
 
-Class/session reporting dashboard
-
-Heatmap of attention
-
-Cloud sync (optional)
-
-Teacher login
-
-Model training UI
+This project aims to assist teachers by providing real-time insights into student engagement using AI, helping improve learning efficiency in classrooms.
